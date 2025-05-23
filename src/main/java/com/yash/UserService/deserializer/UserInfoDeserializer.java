@@ -1,18 +1,17 @@
 package com.yash.UserService.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yash.UserService.entities.UserInfoDto;
 import org.apache.kafka.common.serialization.Deserializer;
 
-public class UserInfoDeserializer  implements Deserializer {
+public class UserInfoDeserializer  implements Deserializer<UserInfoEvent> {
 
 
     @Override
-    public UserInfoDto deserialize(String s, byte[] bytes) {
+    public UserInfoEvent deserialize(String s, byte[] bytes) {
         ObjectMapper objectMapper = new ObjectMapper();
-        UserInfoDto user = null;
+        UserInfoEvent user = null;
         try {
-            user = objectMapper.readValue(bytes, UserInfoDto.class);
+            user = objectMapper.readValue(bytes, UserInfoEvent.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

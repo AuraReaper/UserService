@@ -1,7 +1,7 @@
 package com.yash.UserService.service;
 
+import com.yash.UserService.deserializer.UserInfoEvent;
 import com.yash.UserService.entities.UserInfo;
-import com.yash.UserService.entities.UserInfoDto;
 import com.yash.UserService.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,29 +16,18 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserInfoDto createOrUpdateUser(UserInfoDto userInfoDto) {
+    public UserInfoEvent createOrUpdateUser(UserInfoEvent userInfoEvent) {
 
-        UserInfo transformToUserInfo = UserInfo.builder()
-                .userid(userInfoDto.userId())
-                .firstName(userInfoDto.firstName())
-                .lastName(userInfoDto.lastName())
-                .phoneNumber(userInfoDto.phoneNumber())
-                .email(userInfoDto.email())
-                .profilePic(userInfoDto.profilePic())
-                .username(userInfoDto.username())
-                .build();
+        UnaryOperator<UserInfo> updatingUser = user -> userRepository.save(userInfoEvent.transformToUserInfo());
 
-        UnaryOperator<UserInfo> updatingUser = user -> userRepository.save(transformToUserInfo);
+        Supplier<UserInfo> createUser = () -> userRepository.save(userInfoEvent.transformToUserInfo());
 
-        Supplier<UserInfo> createUser = () -> userRepository.save(transformToUserInfo);
-
-        UserInfo userInfo = userRepository.findByUserid(userInfoDto.userId())
+        UserInfo userInfo = userRepository.findByUserId(userInfoEvent.getUserId())
                 .map(updatingUser)
                 .orElseGet(createUser);
 
-        return new UserInfoDto(
-                userInfo.getUserid(),
-                userInfo.getUsername(),
+        return new UserInfoEvent(
+                userInfo.getUserId(),
                 userInfo.getFirstName(),
                 userInfo.getLastName(),
                 userInfo.getPhoneNumber(),
@@ -47,16 +36,15 @@ public class UserService {
         );
     }
 
-    public UserInfoDto getUser(UserInfoDto userInfoDto) throws Exception {
-        Optional<UserInfo> userInfoDtoOpt = userRepository.findByUserid(userInfoDto.userId());
+    public UserInfoEvent getUser(String email) throws Exception {
+        Optional<UserInfo> userInfoDtoOpt = userRepository.findByEmail(email);
         if(userInfoDtoOpt.isEmpty()){
             throw new Exception("User not found");
         }
         UserInfo userInfo = userInfoDtoOpt.get();
 
-        return new UserInfoDto(
-                userInfo.getUserid(),
-                userInfo.getUsername(),
+        return new UserInfoEvent(
+                userInfo.getUserId(),
                 userInfo.getFirstName(),
                 userInfo.getLastName(),
                 userInfo.getPhoneNumber(),

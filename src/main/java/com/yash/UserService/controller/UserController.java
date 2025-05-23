@@ -1,36 +1,36 @@
 package com.yash.UserService.controller;
 
-import com.yash.UserService.entities.UserInfoDto;
+import com.yash.UserService.deserializer.UserInfoEvent;
 import com.yash.UserService.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 public class UserController {
 
+    @Autowired
     private UserService userService;
 
     @GetMapping("/user/v1/getUser")
-    public ResponseEntity<UserInfoDto> getUser(@RequestBody UserInfoDto userInfoDto) {
+    public ResponseEntity<UserInfoEvent> getUser(@RequestParam String email) {
         try {
-            UserInfoDto user = userService.getUser(userInfoDto);
+            UserInfoEvent user = userService.getUser(email);
             return ResponseEntity.ok(user);
         }catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
     
-    @GetMapping("/user/v1/createOrUpdateUser")
-    public ResponseEntity<UserInfoDto> createOrUpdateUser(@RequestBody UserInfoDto userInfoDto) {
+    @PostMapping("/user/v1/createUpdate")
+    public ResponseEntity<UserInfoEvent> createOrUpdateUser(@RequestBody UserInfoEvent userInfoEvent) {
         try {
-            UserInfoDto user = userService.createOrUpdateUser(userInfoDto);
+            UserInfoEvent user = userService.createOrUpdateUser(userInfoEvent);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
     
